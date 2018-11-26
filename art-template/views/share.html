@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>我的博客</title>
+    <script type="text/javascript" src="./../node_modules/jquery/dist/jquery.js"></script>
+    <script src="./../node_modules/bootstrap/dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="./../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <!-- 自适应文字大小 -->
+    <!--<script type="text/javascript" src="./../public/js/font.js"></script>-->
+    <link href="./../public/css/blog.css" rel="stylesheet">
+    <link rel="stylesheet" href="./../public/css/canvas.css" >
+</head>
+<body>
+<div id="main">
+    <!-- 菜单 -->
+    <menu>
+        <div class="container">
+            <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">
+                <a href="#" class="navbar-brand">
+                    传智博客
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsible">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <ul class="navbar-nav nav-position" style="position:absolute;right:5%;">
+                    <li class="nav-item">
+                        <span style="color:rgba(255,255,255,.5)" v-show="!username">
+                            <button class="btn btn-primary" onclick="javascript:window.location.href='/login'">登录</button>
+                            <button class="btn btn-success" onclick="javascript:window.location.href='/'">注册</button>
+                        </span>
+                        <span style="color:rgba(255,255,255,.5)"  v-show="username">
+                                欢迎你
+                            <span href="#" data-toggle="dropdown" style="color:white;cursor: pointer">
+                                {{ email }}
+                            </span>
+                            <ul class="dropdown-menu">
+                                <li class="nav-border">
+                                    <a href="/mineNews">个人信息</a>
+                                </li>
+                                <li class="nav-border">
+                                    <a href="/Logoff">退出</a>
+                                </li>
+                            </ul>
+                        </span>
+                    </li>
+                </ul>
+                <div class="collapse navbar-collapse" id="collapsible">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a href="#" @click="home()" class="nav-link home">文章首页</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" @click="myblog()" class="nav-link myblog">我的博客</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" @click="text()" class="nav-link text">技术文章</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a href="#" @click="share()" class="nav-link share">开发分享</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" @click="data()" class="nav-link data">我的资料</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </menu>
+    <!-- 主要内容 -->
+    <div class="bg-list">
+        <main role="main" class="container">
+            <div class="d-flex align-items-center p-3 my-3 text-white-50 bg-purple rounded shadow-sm">
+                <div class="lh-100">
+                    <h6 class="mb-0 text-white lh-100">开发分享</h6>
+                    <small>Since{{time}}</small>
+                </div>
+            </div>
+
+            <div class="my-3 p-3 bg-white rounded shadow-sm">
+                <h6 class="border-bottom border-gray pb-2 mb-0">前端开发</h6>
+                <p v-if="jsList.length === '0'">暂无数据</p>
+                <div class="media text-muted pt-3" v-for="item in jsList" v-else>
+                    <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                        <a :href="item.href" @click="details($event)" :id="item._id">{{item.name}}</a>
+                        <span style="float:right">{{item.author}}</span>
+                    </p>
+                </div>
+                <small class="d-block text-right mt-3">
+                    <a href="#" @click="more()">点击查看更多</a>
+                </small>
+            </div>
+
+            <div class="my-3 p-3 bg-white rounded shadow-sm">
+                <h6 class="border-bottom border-gray pb-2 mb-0">后端开发</h6>
+                <p v-if="javaList.length === '0'" style="text-align:center;">暂无数据</p>
+                <div class="media text-muted pt-3" v-for="item in javaList" v-else>
+                    <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                        <a :href="item.href" @click="details($event)" :id="item._id">{{item.name}}</a>
+                        <span style="float:right">{{item.author}}</span>
+                    </p>
+                </div>
+                <small class="d-block text-right mt-3">
+                    <a href="#" @click="more()">点击查看更多</a>
+                </small>
+            </div>
+
+            <div class="my-3 p-3 bg-white rounded shadow-sm">
+                <h6 class="border-bottom border-gray pb-2 mb-0">其他连接</h6>
+                <p v-if="javaList === ''" style="text-align:center;">暂无数据</p>
+                <div class="media text-muted pt-3" v-for="item in other" v-else>
+                    <p class="media-body pb-3 mb-0 small lh-125 border-bottom border-gray">
+                        <a :href="item.href" @click="details($event)" :id="item._id">{{item.name}}</a>
+                        <span style="float:right">{{item.author}}</span>
+                    </p>
+                </div>
+                <small class="d-block text-right mt-3">
+                    <a href="#" @click="more()">点击查看更多</a>
+                </small>
+            </div>
+
+        </main>
+    </div>
+</div>
+<script type="text/javascript" src="./../node_modules/vue/dist/vue.min.js"></script>
+<script>
+    const vm = new Vue({
+        el:'#main',
+        data:{
+            // 是否有账号登录
+            username:true,
+            // 用户名称
+            email:'',
+            // 前端列表数据
+            jsList:[],
+            // 后端列表数据
+            javaList:[],
+            // 截至时间
+            time:'',
+            // 其他列表数据
+            other:[]
+        },
+        mounted(){
+            let that = this;
+            // 获取当前年份
+            let date = new Date();
+            that.time = date.getFullYear();
+            that.email = location.search.split('?')[1].split('=')[1]
+            if( that.email !== '' ){
+                that.username = true;
+                // 获取用户信息
+                $.ajax({
+                    url:"/patient",
+                    data:{
+                        email:that.email
+                    },
+                    dataType:"json",
+                    type:"post",
+                    success:function(data){
+                        that.userNews = data.data;
+                    }
+                })
+            }else{
+                that.username = false;
+                that.email= '';
+                // 所偶输入框禁止输入
+                // 获取所有输入框
+                let inputs = $('input');
+                for( let a = 0; a < inputs.length; a++ ){
+                    $(inputs[a]).attr('disabled','true')
+                }
+                let selects = $('select');
+                for( let a = 0; a < selects.length; a++ ){
+                    $(selects[a]).attr('disabled','true')
+                }
+            }
+            // 获取文章列表数据
+            $.ajax({
+                url:'/shareList',
+                dataType:'json',
+                type:'get',
+                success:function(data){
+                    console.log(data);
+                    for( let a = 0; a < data.data.length; a++ ){
+                        if( data.data[a].type === '1' ){
+                            // 前端数据列表
+                            that.jsList.push(data.data[a])
+                        }else if( data.data[a].type === '2' ){
+                            // 后端数据列表
+                            that.javaList.push(data.data[a])
+                        }else if( data.data[a].type === '3' ){
+                            // 其他数据列表
+                            that.other.push(data.data[a])
+                        }
+                    }
+                }
+            })
+        },
+        methods:{
+            home:function(){
+                window.location.href='/home?email='+this.email
+            },
+            myblog:function(){
+                window.location.href='/myblog?email='+this.email
+            },
+            data:function(){
+                window.location.href='/data?email='+this.email
+            },
+            share:function(){
+                window.location.href='/share?email='+this.email
+            },
+            text:function(){
+                window.location.href='/text?email='+this.email
+            },
+            details:function(e){
+                let id = e.target.getAttribute('id');
+                let name = e.target.getAttribute('title');
+                window.location.href='/details?email='+ this.email + '&id='+ id + '&name=' + name
+            }
+        }
+    })
+</script>

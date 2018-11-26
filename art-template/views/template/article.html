@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>我的博客</title>
+    <script type="text/javascript" src="./../node_modules/jquery/dist/jquery.js"></script>
+    <script src="./../node_modules/bootstrap/dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="./../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <!-- 自适应文字大小 -->
+    <!--<script type="text/javascript" src="./../public/js/font.js"></script>-->
+    <link href="./../public/css/blog.css" rel="stylesheet">
+    <link rel="stylesheet" href="./../../public/css/article/grid.css" >
+    <style>
+        .container{
+            max-width:1024px;
+            padding:0 7px;
+        }
+    </style>
+</head>
+<body>
+<div id="main">
+    <!-- 菜单 -->
+    <menu>
+        <div class="container">
+            <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">
+                <a href="#" class="navbar-brand">
+                    传智博客
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsible">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <ul class="navbar-nav nav-position" style="position:absolute;right:5%;">
+                    <li class="nav-item">
+                        <span style="color:rgba(255,255,255,.5)" v-show="!username">
+                            <button class="btn btn-primary" onclick="javascript:window.location.href='/login'">登录</button>
+                            <button class="btn btn-success" onclick="javascript:window.location.href='/'">注册</button>
+                        </span>
+                        <span style="color:rgba(255,255,255,.5)"  v-show="username">
+                                欢迎你
+                            <span href="#" data-toggle="dropdown" style="color:white;cursor: pointer">
+                                {{ email }}
+                            </span>
+                            <ul class="dropdown-menu">
+                                <li class="nav-border">
+                                    <a href="/mineNews">个人信息</a>
+                                </li>
+                                <li class="nav-border">
+                                    <a href="/Logoff">退出</a>
+                                </li>
+                            </ul>
+                        </span>
+                    </li>
+                </ul>
+                <div class="collapse navbar-collapse" id="collapsible">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a href="#" @click="home()" class="nav-link home">文章首页</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" @click="myblog()" class="nav-link myblog">我的博客</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a href="#" @click="textUrl()" class="nav-link text">技术文章</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" @click="share()" class="nav-link share">开发分享</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" @click="data()" class="nav-link data">我的资料</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </menu>
+    <!-- 主要内容 -->
+    <div class="bg-list" style="margin-top:35px;">
+        <div class="container" class="row">
+            <div style="background:white;width:100%;overflow:hidden" class="col-12">
+                <h5>
+                    <span style="background:#007bff;height:18px;width:5px;display:inline-block;vertical-align: middle;margin-right:5px;"></span>
+                    <b style="color:#007bff">{{text.title}}</b>
+                </h5>
+                <p style="text-indent: 2rem;">{{text.content}}</p>
+                <div class="footer" style="float:right;margin-top: 30px;">
+                    <span>作者: <a href="">{{text.author}}</a></span>
+                    <br>
+                    <span>发布时间: {{text.creatTime}}</span>
+                </div>
+                <div class="label" style="margin-top:100px;">
+                    标签:
+                    <a v-for="item in text.label" href="">
+                        {{item}}
+                    </a>
+                </div>
+                <div style="margin-top:10px;">
+                    <p class="then">
+                        << 上一篇
+                        &nbsp&nbsp
+                        <a href="#" @click="nextTextUrl(event)" :id="prevText.name" v-if="prevText.title">{{prevText.title}}</a>
+                        <span v-else>没有了</span>
+                    </p>
+                    <p class="then">
+                        >> 下一篇
+                        &nbsp&nbsp
+                        <a href="#" @click="nextTextUrl(event)" :id="nextText.name" v-if="nextText.title">{{nextText.title}}</a>
+                        <span v-else>没有了</span>
+                    </p>
+                </div>
+            </div>
+            <div style="background:white;width:100%;overflow:hidden;margin-top:10px;" class="col-12">
+                <h6>评论列表</h6>
+                <div v-for="(item,index) in text.comment" style="width:98%;margin:0 auto;border-bottom:1px solid #f0f0f0">
+                    <h6 style="margin-top:15px;">
+                        <a href="">{{item.username}}</a>
+                        <span>{{index+1}}楼</span>
+                        <span style="float:right;font-size:0.9rem;">评论于 {{item.creatTime}}</span>
+                    </h6>
+                    <p style="font-size:0.8rem;">{{item.content}}</p>
+                    <div class="pinglun">
+                        <a href="#" @click="support(event)" :id='item.id'>赞同 <span>{{item.support}}</span> </a>
+                        <a href="#" @click="refuse(event)" :id='item.id'>反对  <span>{{item.refuse}}</span> </a>
+                        <!--<a href="#" @click="replyShow()" :id="item." >回复 ( {{item.reply.length}} )</a>-->
+                    </div>
+                    <!--<div v-if="reply" >-->
+                        <!--111-->
+                    <!--</div>-->
+                </div>
+                <div style="width:100%;font-size:0.9rem">
+                    <textarea class="textarea" type="text" placeholder="你想对作者说些什么"></textarea>
+                    <p v-if="email === '' " style="float:left;margin-left:1%;border:1px solid #f0f0f0;width:60%;line-height:2rem;">
+                        &nbsp&nbsp您还未登录本网站  &nbsp&nbsp 点击
+                        <a href="/login">登录</a>
+                        <a href="/">注册</a>
+                    </p>
+                    <button class="btn-danger btn release" @click="release()">发布</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="./../node_modules/vue/dist/vue.min.js"></script>
+<script>
+    const vm = new Vue({
+        el:'#main',
+        data:{
+            // 是否有账号登录
+            username:true,
+            // 用户名称
+            email:'',
+            name:"",
+            // 文章数据
+            text:'',
+            // 下一篇文章内容
+            nextText:"",
+            // 上一篇文章内容
+            prevText:"",
+            // 是否显示回复内容
+            reply:false
+        },
+        mounted(){
+            let that = this;
+            that.email = location.search.split('?')[1].split('&')[0].split('=')[1]
+            that.name = location.search.split('?')[1].split('&')[2].split('=')[1]
+            that.id = location.search.split('?')[1].split('&')[1].split('=')[1]
+            $.ajax({
+                url:"/article",
+                data:{
+                    id:that.id,
+                    name:that.name
+                },
+                dataType:"json",
+                type:"post",
+                success:function(data){
+                    console.log(data)
+                    that.text = data.data;
+                }
+            });
+            $.ajax({
+                url:"/article",
+                data:{
+                    id:that.id
+                },
+                dataType:"json",
+                type:"post",
+                success:function(data){
+                    let arrText = data.data[0].textArr;
+                    for( let a = 0; a < arrText.length; a++ ){
+                        if( arrText[a].name === that.name ){
+                            if( arrText[a-1] ){
+                                that.prevText = arrText[a-1]
+                            }else{
+                                that.prevText = ""
+                            }
+                            if( arrText[a+1] ){
+                                that.nextText = arrText[a+1]
+                            }else{
+                                that.nextText = ""
+                            }
+                        }
+                    }
+                }
+            });
+            // 获取当前年份
+            if( that.email !== '' ){
+                that.username = true;
+            }else{
+                that.username = false;
+                that.email= '';
+                // 所偶输入框禁止输入
+                // 获取所有输入框
+                let inputs = $('input');
+                for( let a = 0; a < inputs.length; a++ ){
+                    $(inputs[a]).attr('disabled','true')
+                }
+                let selects = $('select');
+                for( let a = 0; a < selects.length; a++ ){
+                    $(selects[a]).attr('disabled','true')
+                }
+            }
+        },
+        methods:{
+            home:function(){
+                window.location.href='/home?email='+this.email
+            },
+            myblog:function(){
+                window.location.href='/myblog?email='+this.email
+            },
+            data:function(){
+                window.location.href='/data?email='+this.email
+            },
+            share:function(){
+                window.location.href='/share?email='+this.email
+            },
+            textUrl:function(){
+                window.location.href='/text?email='+this.email
+            },
+            nextTextUrl:function(e){
+                let id = e.target.getAttribute('id');
+                let url = '/details?email='+ this.email + '&id='+ this.id + '&name=' + id
+                window.location.href= url
+            },
+            release:function(){
+                let that = this;
+                if( that.email !== '' ){
+                    // 判断是否登录
+
+                }
+            },
+            // 赞同
+            support:function(e){
+                // 取消当前属性的默认行为
+                e.preventDefault()
+                let that = this;
+                let a = parseInt(e.target.lastChild.innerText)+1;
+                let id = e.target.getAttribute('id');
+                //发送请求
+                $.ajax({
+                    url:"/updateList",
+                    data:{
+                        id:that.id,
+                        name:that.name,
+                        // 评论列表 id
+                        listId:id,
+                        support:a
+                    },
+                    dataType:"json",
+                    type:'post',
+                    success:function(data){
+                        console.log(data)
+                    }
+                })
+            },
+            // 反对
+            refuse:function(e){
+                e.preventDefault()
+            }
+        }
+    })
+</script>
+
+
+</body>
+</html>

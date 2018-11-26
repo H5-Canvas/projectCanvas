@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>我的博客</title>
+    <script type="text/javascript" src="./../node_modules/jquery/dist/jquery.js"></script>
+    <link rel="stylesheet" href="./../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <!-- 自适应文字大小 -->
+    <!--<script type="text/javascript" src="./../public/js/font.js"></script>-->
+    <link rel="stylesheet" href="./../public/css/main.css">
+</head>
+<body>
+
+<div class="content" style="margin:0 auto;width:90%;">
+    <form class="form-signin" id="fromReg">
+        <div class="text-center mb-4">
+            <img class="mb-4" src="./../public/image/logo.png" alt="" width="150" height="50">
+            <h1 class="h3 mb-3 font-weight-normal" style="font-size:1.45rem">用户登录</h1>
+            <p>欢迎来到 传智博客 <a href="https://caniuse.com/#feat=css-placeholder-shown">程序员学习的天堂</a></p>
+        </div>
+
+        <div class="form-label-group">
+            <label for="inputEmail">邮箱</label>
+            <span style="color:red;">*</span>
+            <input type="email" id="inputEmail" class="form-control" autofocus>
+        </div>
+
+        <div class="form-label-group">
+            <label for="inputPassword">密码</label>
+            <span style="color:red;">*</span>
+            <input type="password" id="inputPassword" class="form-control">
+        </div>
+
+        <div class="checkbox mb-3">
+            <label>
+                <input type="checkbox" value="remember-me"> 记住密码
+            </label>
+        </div>
+    </form>
+    <div class="send">
+        <p>
+            没有账号?<a href="/">点击注册</a>
+        </p>
+        <button class="btn btn-primary btn-block" onclick="send()">登录</button>
+        <p class="mt-5 mb-3 text-muted text-center">&copy; 2017-2018</p>
+    </div>
+</div>
+<script>
+    // language=JQuery-CSS
+    function send(){
+        $.ajax({
+            url:"/login",
+            type:'post',
+            data:{
+                email:$('#inputEmail').val(),
+                password:$('#inputPassword').val()
+            },
+            dataType:'json',
+            success:function(data){
+                if( data.success ){
+                    if( data.code === 2 ){
+                        alert('登录成功')
+                        window.location.href="./home?email="+$('#inputEmail').val()
+                    }else{
+                        alert('邮箱或密码错误')
+                    }
+                }
+            }
+        })
+    }
+</script>
+
+
+</body>
+</html>

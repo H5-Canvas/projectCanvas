@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>我的博客</title>
+    <script type="text/javascript" src="./../node_modules/jquery/dist/jquery.js"></script>
+    <script src="./../node_modules/bootstrap/dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="./../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <!-- 自适应文字大小 -->
+    <!--<script type="text/javascript" src="./../public/js/font.js"></script>-->
+    <link href="./../public/css/blog.css" rel="stylesheet">
+    <link rel="stylesheet" href="./../../public/css/article/grid.css" >
+    <script type="text/javascript" src="./../public/js/wangEditor.min.js"></script>
+    <link rel="stylesheet" href="./../../public/css/wangEditor.min.css" >
+    <style>
+        .container{
+            max-width:1024px;
+            padding:0 7px;
+        }
+        .toolbar {
+            border: 1px solid #ccc;
+            width:100%;
+        }
+        .text1 {
+            border: 1px solid #ccc;
+            height: 400px;
+        }
+    </style>
+</head>
+<body>
+<div id="main">
+    <!-- 菜单 -->
+    <menu>
+        <div class="container">
+            <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top" style="z-index:99999">
+                <a href="#" class="navbar-brand">
+                    传智博客
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsible">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <ul class="navbar-nav nav-position" style="position:absolute;right:5%;">
+                    <li class="nav-item">
+                        <span style="color:rgba(255,255,255,.5)" v-show="!username">
+                            <button class="btn btn-primary" onclick="javascript:window.location.href='/login'">登录</button>
+                            <button class="btn btn-success" onclick="javascript:window.location.href='/'">注册</button>
+                        </span>
+                        <span style="color:rgba(255,255,255,.5)"  v-show="username">
+                                欢迎你
+                            <span href="#" data-toggle="dropdown" style="color:white;cursor: pointer">
+                                {{ email }}
+                            </span>
+                            <ul class="dropdown-menu">
+                                <li class="nav-border">
+                                    <a href="/mineNews">个人信息</a>
+                                </li>
+                                <li class="nav-border">
+                                    <a href="/Logoff">退出</a>
+                                </li>
+                            </ul>
+                        </span>
+                    </li>
+                </ul>
+                <div class="collapse navbar-collapse" id="collapsible">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a href="#" @click="home()" class="nav-link home">文章首页</a>
+                        </li>
+                        <li class="nav-item active">
+                            <a href="#" @click="myblog()" class="nav-link myblog">我的博客</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" @click="textUrl()" class="nav-link text">技术文章</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" @click="share()" class="nav-link share">开发分享</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" @click="data()" class="nav-link data">我的资料</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </div>
+    </menu>
+    <!-- 主要内容 -->
+    <div class="bg-list" style="margin-top:35px;">
+        <div class="container" class="row">
+            <div style="background:white;width:100%;overflow:hidden;margin-top:10px;" class="col-12">
+                <h5>发表文章</h5>
+                <input id="title" style="margin-bottom:10px;" type="text" class="form-control" placeholder="请输入标题">
+                <div id="editor1" class="toolbar">
+
+                </div>
+                <div id="editor" class="text1">
+
+                </div>
+                <!-- 同步textarea -->
+                <!--<label for="text"></label>-->
+                <!--<textarea name="content" id="text" style="width:100%;height:350px;"></textarea>-->
+                <button class="btn btn-clock btn-primary" style="margin-top:20px;" id="send">发表</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="./../node_modules/vue/dist/vue.min.js"></script>
+<script>
+    const vm = new Vue({
+        el:'#main',
+        data:{
+            // 是否有账号登录
+            username:true,
+            // 用户名称
+            email:'',
+            name:"",
+            id:""
+        },
+        mounted(){
+            let that = this;
+            that.email = location.search.split('?')[1].split('&')[0].split('=')[1]
+            that.id = location.search.split('?')[1].split('&')[1].split('=')[1]
+            // 获取用户唯一id
+            $.ajax({
+                url:"/patient",
+                data:{
+                    email:that.email
+                },
+                dataType:"json",
+                type:"post",
+                success:function(data){
+                    that.id = data.data._id
+                    console.log(that.id)
+                }
+            });
+            let E = window.wangEditor;
+            let editor = new E('#editor1','#editor');
+            let $text1 = $('#text')
+            // 或者 var editor = new E( document.getElementById('editor') )
+            // editor.customConfig.onchange = function (html) {
+            //     // 监控变化，同步更新到 textarea
+            //     $text1.val(html)
+            // }
+            editor.customConfig.menus = [
+                'head',
+                'bold',
+                'italic',
+                'underline',
+                'fontSize',
+                'foreColor',
+                'justify',
+                'image',
+                'backColor',
+                'link'
+            ];
+            // 手动关闭黏黏样式的过滤
+            editor.customConfig.pasteFilterStyle = false;
+            editor.customConfig.pasteTextHandle = function (content) {
+                // content 即粘贴过来的内容（html 或 纯文本），可进行自定义处理然后返回
+                return alert('不可以黏黏复制')
+            };
+            editor.customConfig.uploadImgShowBase64 = true //使用 base64 保存图片
+            editor.create();
+            // 继续追加内容
+            // editor.txt.html('<p></p>')
+            // 自定义菜单
+            document.getElementById('send').addEventListener('click', function () {
+                // 读取 html
+                console.log(editor.txt.html())
+                let json = editor.txt.getJSON()  // 获取 JSON 格式的内容
+                let jsonStr = JSON.stringify(json)
+                console.log(json)
+                console.log(jsonStr)
+            }, false)
+        },
+        methods:{
+            home:function(){
+                window.location.href='/home?email='+this.email
+            },
+            myblog:function(){
+                window.location.href='/myblog?email='+this.email
+            },
+            data:function(){
+                window.location.href='/data?email='+this.email
+            },
+            share:function(){
+                window.location.href='/share?email='+this.email
+            },
+            textUrl:function(){
+                window.location.href='/text?email='+this.email
+            },
+            release:function(){
+                let that = this;
+                if( that.email !== '' ){
+                    // 判断是否登录
+
+                }
+            }
+        }
+    })
+</script>
+
+
+</body>
+</html>

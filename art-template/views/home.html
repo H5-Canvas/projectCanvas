@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>我的博客</title>
+    <script type="text/javascript" src="./../node_modules/jquery/dist/jquery.js"></script>
+    <script src="./../node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="./../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <!-- 自适应文字大小 -->
+    <!--<script type="text/javascript" src="./../public/js/font.js"></script>-->
+    <link href="./../public/css/blog.css" rel="stylesheet">
+</head>
+<body>
+    <div id="main">
+        <!-- 菜单 -->
+        <menu>
+            <div class="container">
+                <nav class="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">
+                    <a href="#" class="navbar-brand">
+                        传智博客
+                    </a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsible">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <ul class="navbar-nav nav-position" style="position:absolute;right:5%;">
+                        <li class="nav-item">
+                            <span style="color:rgba(255,255,255,.5)" v-show="!username">
+                                <button class="btn btn-primary" onclick="javascript:window.location.href='/login'">登录</button>
+                                <button class="btn btn-success" onclick="javascript:window.location.href='/'">注册</button>
+                            </span>
+                            <span style="color:rgba(255,255,255,.5)" v-show="username">
+                                欢迎你
+                                <span href="#" data-toggle="dropdown" style="color:white;cursor: pointer">
+                                    {{email}}
+                                </span>
+                                <ul class="dropdown-menu">
+                                    <li class="nav-border">
+                                        <a href="/mineNews">个人信息</a>
+                                    </li>
+                                    <li class="nav-border">
+                                        <a href="/Logoff">退出</a>
+                                    </li>
+                                </ul>
+                            </span>
+                        </li>
+                    </ul>
+                    <div class="collapse navbar-collapse" id="collapsible">
+                        <ul class="navbar-nav" style="float:left;">
+                            <li class="nav-item active">
+                                <a href="#" @click="home()" class="nav-link home">文章首页</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" @click="myblog()" class="nav-link myblog">我的博客</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" @click="text()" class="nav-link text">技术文章</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" @click="share()" class="nav-link share">开发分享</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#" @click="data()" class="nav-link data">我的资料</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </menu>
+        <!-- 主要内容 -->
+        <main class="main">
+            <ul class="list-group">
+                <li class="list-group-item" v-for="item in textList">
+                    <a href="#" :title="item.name" @click="details(event)" >{{item.title}}</a>
+                    <span class="right">
+                        author:<a href="#" @click="details(event)" :title="item.name">{{item.author}}</a>
+                        <span style="font-size:0.8rem;color:#6c757d">
+                            {{item.createdTime}}
+                        </span>
+                    </span>
+                </li>
+            </ul>
+        </main>
+        <!-- 底部 -->
+        <footer class="footer navbar-fixed-bottom">
+            <div class="container">
+                <p style="text-align:center;width:100%;">&copy; Company 2017</p>
+            </div>
+        </footer>
+    </div>
+    <script type="text/javascript" src="./../node_modules/vue/dist/vue.min.js"></script>
+<script>
+    const vm = new Vue({
+        el:'#main',
+        data:{
+            // 是否有账号登录
+            username:true,
+            // 用户名称
+            email:'',
+            // 文章列表
+            textList:[]
+        },
+        mounted(){
+            let that = this;
+            if( location.search.split('?')[1] ){
+                if( location.search.split('?')[1].split('=')[1] === "" ){
+                    that.username = false;
+                    that.email= ''
+                }else{
+                    that.username = true;
+                    that.email = location.search.split('?')[1].split('=')[1]
+                }
+            }else{
+                that.username = false;
+                that.email= ''
+            }
+            // 初始化获取列表信息
+            $.ajax({
+                url:'/list',
+                dataType:'json',
+                type:'get',
+                success:function(data){
+                    let arr = [];
+                    console.log(data)
+                    for( let a = 0; a < data.data.length; a++ ){
+                        arr.push({
+                            text:data.data[a].text
+                        })
+                    }
+                    for( let i = 0; i < arr.length; i++ ){
+                        for( let a = 0; a < arr[i].text.length; a++ ){
+                            that.textList.push(arr[i].text[a])
+                        }
+                    }
+                }
+            })
+        },
+        methods:{
+            home:function(){
+                window.location.href='/home?email='+this.email
+            },
+            myblog:function(){
+                window.location.href='/myblog?email='+this.email
+            },
+            data:function(){
+                window.location.href='/data?email='+this.email
+            },
+            share:function(){
+                window.location.href='/share?email='+this.email
+            },
+            text:function(){
+                window.location.href='/text?email='+this.email
+            },
+            details:function(e){
+                let id = e.target.getAttribute('title');
+                let name = e.target.getAttribute('title');
+                let url = '/details?email='+ this.email + '&id='+ id + '&name=' + name;
+                window.location.href=url
+            }
+        }
+    })
+</script>
+
+
+</body>
+</html>
